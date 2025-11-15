@@ -8,6 +8,6 @@ public class CorreoExistenteException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	public CorreoExistenteException() {
-		super("EMAIL_DUPLICADO");
+		super("CUENTA_USUARIO_EMAIL_DUPLICADO");
 	}
 }

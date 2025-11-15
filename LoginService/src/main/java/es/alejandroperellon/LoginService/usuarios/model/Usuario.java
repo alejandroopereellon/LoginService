@@ -212,4 +212,12 @@ public class Usuario {
 		this.informacionAdicional = informacionAdicional;
 	}
 
+	@Override
+	public String toString() {
+		return "Usuario [id=" + id + ", correo=" + correo + ", nombreUsuario=" + nombreUsuario + ", nombre=" + nombre
+				+ ", apellido=" + apellido + ", apodo=" + apodo + ", fechaNacimiento=" + fechaNacimiento
+				+ ", fechaCreacionCuenta=" + fechaCreacionCuenta + ", estadoCuenta=" + estadoCuenta
+				+ ", informacionAdicional=" + informacionAdicional + "]";
+	}
+
 }

@@ -2,6 +2,8 @@ package es.alejandroperellon.LoginService.usuarios.service;
 
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +13,7 @@ import es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.repository
 import es.alejandroperellon.LoginService.tokenInicioSesion.builder.TokenBuilder;
 import es.alejandroperellon.LoginService.tokenInicioSesion.model.Token;
 import es.alejandroperellon.LoginService.tokenInicioSesion.repository.TokenRepository;
-import es.alejandroperellon.LoginService.usuarios.dto.BuilderDTOUsuarioPublico;
+import es.alejandroperellon.LoginService.usuarios.builder.BuilderDTOUsuarioPublico;
 import es.alejandroperellon.LoginService.usuarios.dto.DTOUsuarioLogin;
 import es.alejandroperellon.LoginService.usuarios.dto.DTOUsuarioPublico;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CredencialesInvalidasException;
@@ -29,6 +31,8 @@ import es.alejandroperellon.LoginService.usuarios.repository.UsuariosRepository;
  * @version 1.0
  */
 public class AuthService {
+
+	private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
 	private final UsuariosRepository usuariosRepository;
 	private final TokenRepository tokenRepository;
@@ -65,10 +69,12 @@ public class AuthService {
 	 */
 
 	public DTOUsuarioPublico login(DTOUsuarioLogin datosInicioSesion) {
+		logger.debug("Se ha iniciado el metodo de login con el usuario {}", datosInicioSesion.getCorreoElectronico());
 
 		// Registramos los datos introducidos por el usuario
 		String usuarioIntento = datosInicioSesion.getCorreoElectronico();
 		String contrasenaIntento = datosInicioSesion.getContrasena();
+		logger.debug("Se han almacenado los datos del usuario");
 
 		// Registramos el dato de usuario introducido por el cliente
 		IntentoInicioSesion intento = new IntentoInicioSesion();
@@ -89,17 +95,20 @@ public class AuthService {
 
 			// Generamos token del usuario
 			Token token = new TokenBuilder().nuevoToken(usuario);
+			logger.info("Se ha generado el token para el usuario {}", usuario);
 			// Almacenamos el token en la base de datos
 			tokenRepository.save(token);
+			logger.info("Se ha almacenado el token del usuario {} en la BBDD", usuarioIntento);
 
 			// Retornamos el usuario con los datos del token
 			return new BuilderDTOUsuarioPublico(usuario, token).construirUsuarioPublico();
 		} catch (RuntimeException e) {
 			// Retornamos el error al cliente
+			logger.warn("Ha ocurrido un error en el login del usuario");
 			throw e;
-			// TODO Añadir los logs de error proximamente
 		} finally {
 			intentoRepository.save(intento);
+			logger.debug("Se ha almacenado el intento de inicio de sesion: {} en la BBDD", intento);
 		}
 	}
 
@@ -111,14 +120,28 @@ public class AuthService {
 	 * @param usuario, es el {@link Usuario} que se va a comprobar las restricciones
 	 */
 	private void comprobarRestriccionCuenta(Usuario usuario, IntentoInicioSesion intento) {
+		logger.debug("Se va a comprobar las restricciones de la cuenta");
+
+		// Comprobamos si el usuario tiene algun tipo de suspension en la cuenta
 		if (usuario.getEstadoCuenta().equals(EstadoCuenta.SUSPENDIDA_TEMPORALMENTE)
 				|| usuario.getEstadoCuenta().equals(EstadoCuenta.SUSPENDIDA_PERMANENTEMENTE)) {
+			logger.info("La cuenta del usuario {} esta SUSPENDIDA", usuario);
 			intento.setResultado(ResultadoIntentoInicioSesion.CUENTA_SUSPENDIDA);
-			throw new CuentaSuspendidaException("Usuario suspendido, contacta con soporte para mas informacion");
-		} else if (usuario.getEstadoCuenta().equals(EstadoCuenta.ELIMINADA)) {
+
+			logger.debug("Se va a marcar el intento de inicio de sesion como CUENTA_SUSPENDIDA");
+			throw new CuentaSuspendidaException("CUENTA_USUARIO_SUSPENDIDO");
+		} else
+
+		// Comprobamos si el usuario tiene la cuenta eliminada
+		if (usuario.getEstadoCuenta().equals(EstadoCuenta.ELIMINADA)) {
+			logger.info("La cuenta del usuario {} esta ELIMINADA", usuario);
 			intento.setResultado(ResultadoIntentoInicioSesion.CUENTA_ELIMINADA);
-			throw new CuentaEliminadaException("El usuario introducido ha sido eliminado recientemente");
+
+			logger.debug("Se va a marcar el intento de inicio de sesion como CUENTA_ELIMINADA");
+			throw new CuentaEliminadaException("CUENTA_USUARIO_ELIMINADO");
 		}
+
+		logger.info("El usuario {} no tiene ningun tipo de resrtriccion en la cuenta", usuario);
 	}
 
 	/**
@@ -132,13 +155,20 @@ public class AuthService {
 	 *                          contraseña para comprobar si coinciden
 	 */
 	private void comprobarContrasenaUsuario(String contrasenaIntento, Usuario usuario, IntentoInicioSesion intento) {
+		logger.debug("Se va a comprobar la contraseña del usuario {}", usuario);
 
 		boolean passwordMatches = passwordEncoder.matches(contrasenaIntento, usuario.getContrasenaHash());
+		logger.debug("Se ha creado el hash de la contraseña y se va a comprar");
 
 		if (!passwordMatches) {
+			logger.info("La contraseña introducida para el usuario {} no coincide con la base de datos", usuario);
 			intento.setResultado(ResultadoIntentoInicioSesion.CONTRASENA_INCORRECTA);
-			throw new CredencialesInvalidasException("Usuario o contraseña incorrectos");
+			logger.debug("Se ha marcado el intento de inicio de sesion del usuario {} con CONTRASEÑA_INCORRECTA",
+					usuario);
+			throw new CredencialesInvalidasException("CUENTA_USUARIO_CONTRASENA_ERRONEA");
 		}
+
+		logger.info("La contraseña introducida para el usuario {} coincide con la BBDD", usuario);
 	}
 
 	/**
@@ -151,15 +181,20 @@ public class AuthService {
 	 *                       peticion de inicio de sesion
 	 */
 	private Usuario obtenerUsuarioLogin(String usuarioIntento, IntentoInicioSesion intento) {
+		logger.debug("Se van a obtener los datos del usuario");
+
 		// Buscamos el usuario en la base de datos
 		Optional<Usuario> usuario = usuariosRepository.findByCorreoOrNombreUsuario(usuarioIntento, usuarioIntento);
 
 		// Comprobamos si el usuario esta vacio
 		if (usuario.isEmpty()) {
+			logger.info("El usuario {} no existe en la base de datos", usuarioIntento);
 			intento.setResultado(ResultadoIntentoInicioSesion.USUARIO_INEXISTENTE);
-			throw new CredencialesInvalidasException("Usuario o contraseña incorrectos");
+			logger.debug("Se ha marcado el intento de inicio de sesion como USUARIO_INEXISTENTE");
+			throw new CredencialesInvalidasException("CUENTA_USUARIO_NOMBREUSUARIO_CORREO_INCORRECTOS");
 		} else {
 			// Si el usuario existe en el sistema se va a añadir al sistema
+			logger.info("El usuario {} existe en la base de datos", usuario.get());
 			intento.setUsuario(usuario.get());
 		}
 
