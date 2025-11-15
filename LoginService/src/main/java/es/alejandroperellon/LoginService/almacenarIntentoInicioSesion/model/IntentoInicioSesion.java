@@ -51,7 +51,7 @@ public class IntentoInicioSesion {
 	// Constructores
 	public IntentoInicioSesion() {
 	}
-
+	
 	@PrePersist
 	protected void onCreate() {
 		if (momentoIntento == null) {

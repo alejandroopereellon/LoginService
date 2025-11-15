@@ -13,20 +13,14 @@ import jakarta.validation.constraints.*;
  */
 public class DTOUsuarioLogin {
 
-	@NotBlank(message = "El correo no puede estar en blanco")
-	@Email(message = "El correo debe tener un formato válido")
-	private String correoElectronico;
+	@NotBlank(message = "El usuario o correo no puede estar en blanco")
+	private String usuario;
 
 	@NotBlank
 	@Size(min = 8, max = 64)
 	private String contrasena;
 
 	// Constructores
-
-	public DTOUsuarioLogin(String correoElectronico, String contrasena) {
-		this.setCorreoElectronico(correoElectronico);
-		this.setContrasena(contrasena);
-	}
 
 	public DTOUsuarioLogin() {
 	}
@@ -41,11 +35,11 @@ public class DTOUsuarioLogin {
 	}
 
 	public String getCorreoElectronico() {
-		return correoElectronico;
+		return usuario;
 	}
 
 	public void setCorreoElectronico(String correoElectronico) {
-		this.correoElectronico = correoElectronico;
+		this.usuario = correoElectronico;
 	}
 
 }
