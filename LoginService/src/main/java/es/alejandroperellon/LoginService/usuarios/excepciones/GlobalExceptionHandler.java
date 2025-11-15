@@ -1,7 +1,7 @@
 package es.alejandroperellon.LoginService.usuarios.excepciones;
 
-import java.time.LocalDateTime;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,50 +10,71 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CredencialesInvalidasException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CuentaEliminadaException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CuentaSuspendidaException;
-import jakarta.servlet.http.HttpServletRequest;
+import es.alejandroperellon.LoginService.usuarios.excepciones.registerException.CorreoExistenteException;
+import es.alejandroperellon.LoginService.usuarios.excepciones.registerException.UsuarioExistenteException;
 
-/**
- * Envia los errores al cliente
- */
 @RestControllerAdvice
+/**
+ * Manejador global de excepciones del servicio de usuarios.
+ * 
+ * Captura y traduce excepciones de negocio a respuestas HTTP con una estructura unificada
+ * ({@link ApiResponse}) usando claves i18n y códigos técnicos para que el cliente pueda
+ * presentar los mensajes en su idioma.
+ * 
+ * Controla tanto los errores de login como los de registro.
+ * 
+ * Códigos de estado:
+ * <ul>
+ *   <li>401 → Credenciales inválidas</li>
+ *   <li>403 → Cuenta suspendida o eliminada</li>
+ *   <li>409 → Conflictos de registro (correo o usuario existente)</li>
+ * </ul>
+ */
+
 public class GlobalExceptionHandler {
 
+	private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
 	@ExceptionHandler(CredencialesInvalidasException.class)
-	public ResponseEntity<ErrorResponse> handleCredencialesInvalidas(CredencialesInvalidasException ex,
-			HttpServletRequest request) {
-
-		ErrorResponse error = new ErrorResponse();
-		error.setCodigo("CREDENCIALES_INVALIDAS");
-		error.setMensaje(ex.getMessage());
-		error.setRuta(request.getRequestURI());
-		error.setInstante(LocalDateTime.now());
-
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+	public ResponseEntity<ApiResponse> handleCredencialesInvalidas(CredencialesInvalidasException ex) {
+		logger.warn("Credenciales inválidas: {}", ex.getMessage());
+		
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				.body(ApiResponse.error("login.error.credenciales_invalidas", "CREDENCIALES_INVALIDAS"));
 	}
 
 	@ExceptionHandler(CuentaEliminadaException.class)
-	public ResponseEntity<ErrorResponse> handleCuentaEliminada(CuentaEliminadaException ex,
-			HttpServletRequest request) {
-
-		ErrorResponse error = new ErrorResponse();
-		error.setCodigo("CUENTA_ELIMINADA");
-		error.setMensaje(ex.getMessage());
-		error.setRuta(request.getRequestURI());
-		error.setInstante(LocalDateTime.now());
-
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+	public ResponseEntity<ApiResponse> handleCuentaEliminada(CuentaEliminadaException ex) {
+		logger.warn("Cuenta eliminada: {}", ex.getMessage());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(ApiResponse.error("login.error.cuenta_eliminada", "CUENTA_ELIMINADA"));
 	}
 
 	@ExceptionHandler(CuentaSuspendidaException.class)
-	public ResponseEntity<ErrorResponse> handleCuentaSuspendida(CuentaSuspendidaException ex,
-			HttpServletRequest request) {
+	public ResponseEntity<ApiResponse> handleCuentaSuspendida(CuentaSuspendidaException ex) {
+		logger.warn("Cuenta suspendida: {}", ex.getMessage());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN)
+				.body(ApiResponse.error("login.error.cuenta_suspendida", "CUENTA_SUSPENDIDA"));
+	}
 
-		ErrorResponse error = new ErrorResponse();
-		error.setCodigo("CREDENCIALES_INVALIDAS");
-		error.setMensaje(ex.getMessage());
-		error.setRuta(request.getRequestURI());
-		error.setInstante(LocalDateTime.now());
+	@ExceptionHandler(UsuarioExistenteException.class)
+	public ResponseEntity<ApiResponse> handleUsuarioExistente(UsuarioExistenteException ex) {
+		logger.warn("Usuario existente: {}", ex.getMessage());
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(ApiResponse.error("registro.error.usuario_existente", "USUARIO_DUPLICADO"));
+	}
 
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+	@ExceptionHandler(CorreoExistenteException.class)
+	public ResponseEntity<ApiResponse> handleCorreoExistente(CorreoExistenteException ex) {
+		logger.warn("Correo existente: {}", ex.getMessage());
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(ApiResponse.error("registro.error.correo_existente", "EMAIL_DUPLICADO"));
+	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ApiResponse> handleGenericException(Exception ex) {
+		logger.error("Error no controlado: ", ex);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(ApiResponse.error("error.desconocido", "ERROR_INTERNO"));
 	}
 }

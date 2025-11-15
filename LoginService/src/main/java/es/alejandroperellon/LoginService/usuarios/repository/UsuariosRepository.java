@@ -21,4 +21,21 @@ public interface UsuariosRepository extends JpaRepository<Usuario, Long> {
 	 */
 	public Optional<Usuario> findByCorreoOrNombreUsuario(String correo, String nombreUsuario);
 
+	/**
+	 * Busca un usuario por el correo electronico. Se suele usar en el registro para
+	 * comprobar si existe algun usuario con este correo electronico
+	 * 
+	 * @param correo es el correo electronico que se va a comprobar si existe
+	 * @return {@link Boolean} con true en caso de existir la cuenta
+	 */
+	public boolean existsByCorreo(String correo);
+
+	/**
+	 * Busca un usuario por el nombre de usuario. Se suele usar en el registro para
+	 * comprobar si existe algun usuario con este correo electronico
+	 * 
+	 * @param nombreUsuario es el nombre de usuario que se va a comprobar si existe
+	 * @return {@link Boolean} con true en caso de existir la cuenta
+	 */
+	public boolean existsByNombreUsuario(String nombreUsuario);
 }

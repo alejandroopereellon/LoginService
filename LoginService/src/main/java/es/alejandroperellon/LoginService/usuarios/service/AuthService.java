@@ -22,6 +22,12 @@ import es.alejandroperellon.LoginService.usuarios.model.Usuario;
 import es.alejandroperellon.LoginService.usuarios.repository.UsuariosRepository;
 
 @Service
+/**
+ * Manejo del sistema de inicio de sesion
+ * 
+ * @author Alejandro Perellón López
+ * @version 1.0
+ */
 public class AuthService {
 
 	private final UsuariosRepository usuariosRepository;

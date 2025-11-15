@@ -79,14 +79,6 @@ public class DTOUsuarioRegistro {
 		this.nombre = nombre;
 	}
 
-	public String getApellidos() {
-		return apellido;
-	}
-
-	public void setApellidos(String apellido) {
-		this.apellido = apellido;
-	}
-
 	public String getContrasena() {
 		return contrasena;
 	}
