@@ -11,6 +11,7 @@ import es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.Auxiliar.R
 import es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.model.IntentoInicioSesion;
 import es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.repository.IntentoInicioSesionRepository;
 import es.alejandroperellon.LoginService.tokenInicioSesion.builder.TokenBuilder;
+import es.alejandroperellon.LoginService.tokenInicioSesion.model.TipoToken;
 import es.alejandroperellon.LoginService.tokenInicioSesion.model.Token;
 import es.alejandroperellon.LoginService.tokenInicioSesion.repository.TokenRepository;
 import es.alejandroperellon.LoginService.usuarios.builder.BuilderDTOUsuarioPublico;
@@ -30,16 +31,16 @@ import es.alejandroperellon.LoginService.usuarios.repository.UsuariosRepository;
  * @author Alejandro Perellón López
  * @version 1.0
  */
-public class AuthService {
+public class LoginService {
 
-	private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoginService.class);
 
 	private final UsuariosRepository usuariosRepository;
 	private final TokenRepository tokenRepository;
 	private final IntentoInicioSesionRepository intentoRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public AuthService(UsuariosRepository usuariosRepository, TokenRepository tokenRepository,
+	public LoginService(UsuariosRepository usuariosRepository, TokenRepository tokenRepository,
 			IntentoInicioSesionRepository intento, PasswordEncoder passwordEncoder) {
 		this.usuariosRepository = usuariosRepository;
 		this.tokenRepository = tokenRepository;
@@ -93,15 +94,22 @@ public class AuthService {
 			// Si ha pasado todos los controles ponemos intento correcto
 			intento.setResultado(ResultadoIntentoInicioSesion.CORRECTO);
 
-			// Generamos token del usuario
-			Token token = new TokenBuilder().nuevoToken(usuario);
-			logger.info("Se ha generado el token para el usuario {}", usuario);
+			// Generamos token corto del usuario
+			Token tokenCorto = new TokenBuilder().nuevoToken(usuario, TipoToken.CORTO);
+
 			// Almacenamos el token en la base de datos
-			tokenRepository.save(token);
+			tokenRepository.save(tokenCorto);
+
+			// Generamos token corto del usuario
+			Token tokenLargo = new TokenBuilder().nuevoToken(usuario, TipoToken.LARGO);
+
+			// Almacenamos el token en la base de datos
+			tokenRepository.save(tokenLargo);
+
 			logger.info("Se ha almacenado el token del usuario {} en la BBDD", usuarioIntento);
 
 			// Retornamos el usuario con los datos del token
-			return new BuilderDTOUsuarioPublico(usuario, token).construirUsuarioPublico();
+			return new BuilderDTOUsuarioPublico(usuario, tokenCorto, tokenLargo).construirUsuarioPublico();
 		} catch (RuntimeException e) {
 			// Retornamos el error al cliente
 			logger.warn("Ha ocurrido un error en el login del usuario");

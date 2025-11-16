@@ -6,9 +6,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import es.alejandroperellon.LoginService.clasesAxiliares.ApiResponse;
 import es.alejandroperellon.LoginService.usuarios.builder.BuilderUsuarioNuevo;
 import es.alejandroperellon.LoginService.usuarios.dto.DTOUsuarioRegistro;
-import es.alejandroperellon.LoginService.usuarios.excepciones.ApiResponse;
 import es.alejandroperellon.LoginService.usuarios.excepciones.registerException.CorreoExistenteException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.registerException.UsuarioExistenteException;
 import es.alejandroperellon.LoginService.usuarios.model.Usuario;

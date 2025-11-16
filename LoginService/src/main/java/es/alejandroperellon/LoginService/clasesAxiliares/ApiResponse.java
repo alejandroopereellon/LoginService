@@ -1,4 +1,4 @@
-package es.alejandroperellon.LoginService.usuarios.excepciones;
+package es.alejandroperellon.LoginService.clasesAxiliares;
 
 import java.time.LocalDateTime;
 

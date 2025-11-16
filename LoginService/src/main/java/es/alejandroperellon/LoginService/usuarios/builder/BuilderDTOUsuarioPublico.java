@@ -21,11 +21,14 @@ public class BuilderDTOUsuarioPublico {
 	private static final Logger logger = LoggerFactory.getLogger(BuilderDTOUsuarioPublico.class);
 
 	private final Usuario usuario;
-	private final Token token;
+	private final Token tokenCorto;
+	private final Token tokenLargo;
 
-	public BuilderDTOUsuarioPublico(Usuario usuario, Token token) {
+	public BuilderDTOUsuarioPublico(Usuario usuario, Token tokenCorto, Token tokenLargo) {
+		super();
 		this.usuario = usuario;
-		this.token = token;
+		this.tokenCorto = tokenCorto;
+		this.tokenLargo = tokenLargo;
 	}
 
 	/**
@@ -54,8 +57,11 @@ public class BuilderDTOUsuarioPublico {
 		usuarioPublico.setNombreUsuario(usuario.getNombreUsuario());
 		logger.debug("Se ha establecido el nombre de usuario {}", usuario.getNombreUsuario());
 
-		usuarioPublico.setToken(new TokenPublicoBuilder().construirTokenPublico(token));
-		logger.debug("Se ha establecido el token publico para el usuario");
+		usuarioPublico.setTokenCorto(new TokenPublicoBuilder().construirTokenPublico(tokenCorto));
+		logger.debug("Se ha establecido el token corto publico para el usuario");
+
+		usuarioPublico.setTokenCorto(new TokenPublicoBuilder().construirTokenPublico(tokenLargo));
+		logger.debug("Se ha establecido el token largo publico para el usuario");
 
 		// Retornamos el usuario publico
 		logger.info("Se va a retornar el usuario publico con correo electronico {}",

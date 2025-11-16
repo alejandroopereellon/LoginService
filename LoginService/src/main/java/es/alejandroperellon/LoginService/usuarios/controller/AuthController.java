@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import es.alejandroperellon.LoginService.clasesAxiliares.ApiResponse;
 import es.alejandroperellon.LoginService.usuarios.dto.DTOUsuarioLogin;
 import es.alejandroperellon.LoginService.usuarios.dto.DTOUsuarioPublico;
 import es.alejandroperellon.LoginService.usuarios.dto.DTOUsuarioRegistro;
-import es.alejandroperellon.LoginService.usuarios.excepciones.ApiResponse;
-import es.alejandroperellon.LoginService.usuarios.service.AuthService;
+import es.alejandroperellon.LoginService.usuarios.service.LoginService;
 import es.alejandroperellon.LoginService.usuarios.service.RegisterService;
 import jakarta.validation.Valid;
 
@@ -19,11 +19,11 @@ import jakarta.validation.Valid;
 @RequestMapping("/auth")
 public class AuthController {
 
-	private final AuthService authService;
+	private final LoginService loginService;
 	private final RegisterService registerService;
 
-	public AuthController(AuthService authService, RegisterService registerService) {
-		this.authService = authService;
+	public AuthController(LoginService loginService, RegisterService registerService) {
+		this.loginService = loginService;
 		this.registerService = registerService;
 	}
 
@@ -36,7 +36,7 @@ public class AuthController {
 	 */
 	@PostMapping("/login")
 	public ResponseEntity<DTOUsuarioPublico> login(@Valid @RequestBody DTOUsuarioLogin datosLogin) {
-		DTOUsuarioPublico usuarioPublico = authService.login(datosLogin);
+		DTOUsuarioPublico usuarioPublico = loginService.login(datosLogin);
 
 		return ResponseEntity.ok(usuarioPublico);
 	}
@@ -52,7 +52,7 @@ public class AuthController {
 	public ResponseEntity<ApiResponse> register(@Valid @RequestBody DTOUsuarioRegistro datosRegistro) {
 		ApiResponse respuesta = registerService.register(datosRegistro);
 
-		  return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+		return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
 	}
 
 }

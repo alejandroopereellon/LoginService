@@ -1,7 +1,6 @@
 package es.alejandroperellon.LoginService.usuarios.dto;
 
 import es.alejandroperellon.LoginService.tokenInicioSesion.dto.DTOTokenPublico;
-import es.alejandroperellon.LoginService.tokenInicioSesion.model.Token;
 
 /**
  * Clase que contiene todos los datos publicos de un usuario, para ello a traves
@@ -23,7 +22,9 @@ public class DTOUsuarioPublico {
 
 	private String apodo;
 
-	private DTOTokenPublico token;
+	private DTOTokenPublico tokenCorto;
+
+	private DTOTokenPublico tokenLargo;
 
 	// Constructor
 	public DTOUsuarioPublico() {
@@ -71,12 +72,20 @@ public class DTOUsuarioPublico {
 		this.apodo = apodo;
 	}
 
-	public DTOTokenPublico getToken() {
-		return token;
+	public DTOTokenPublico getTokenCorto() {
+		return tokenCorto;
 	}
 
-	public void setToken(DTOTokenPublico token) {
-		this.token = token;
+	public void setTokenCorto(DTOTokenPublico tokenCorto) {
+		this.tokenCorto = tokenCorto;
+	}
+
+	public DTOTokenPublico getTokenLargo() {
+		return tokenLargo;
+	}
+
+	public void setTokenLargo(DTOTokenPublico tokenLargo) {
+		this.tokenLargo = tokenLargo;
 	}
 
 }

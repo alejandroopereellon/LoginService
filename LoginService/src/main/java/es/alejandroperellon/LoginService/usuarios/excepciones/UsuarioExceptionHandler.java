@@ -7,38 +7,39 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import es.alejandroperellon.LoginService.clasesAxiliares.ApiResponse;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CredencialesInvalidasException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CuentaEliminadaException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CuentaSuspendidaException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.registerException.CorreoExistenteException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.registerException.UsuarioExistenteException;
 
-@RestControllerAdvice
 /**
  * Manejador global de excepciones del servicio de usuarios.
  * 
- * Captura y traduce excepciones de negocio a respuestas HTTP con una estructura unificada
- * ({@link ApiResponse}) usando claves i18n y códigos técnicos para que el cliente pueda
- * presentar los mensajes en su idioma.
+ * Captura y traduce excepciones de negocio a respuestas HTTP con una estructura
+ * unificada ({@link ApiResponse}) usando claves i18n y códigos técnicos para
+ * que el cliente pueda presentar los mensajes en su idioma.
  * 
  * Controla tanto los errores de login como los de registro.
  * 
  * Códigos de estado:
  * <ul>
- *   <li>401 → Credenciales inválidas</li>
- *   <li>403 → Cuenta suspendida o eliminada</li>
- *   <li>409 → Conflictos de registro (correo o usuario existente)</li>
+ * <li>401 → Credenciales inválidas</li>
+ * <li>403 → Cuenta suspendida o eliminada</li>
+ * <li>409 → Conflictos de registro (correo o usuario existente)</li>
  * </ul>
  */
 
-public class GlobalExceptionHandler {
+@RestControllerAdvice(basePackages = "es.alejandroperellon.LoginService.usuarios")
+public class UsuarioExceptionHandler {
 
-	private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(UsuarioExceptionHandler.class);
 
 	@ExceptionHandler(CredencialesInvalidasException.class)
 	public ResponseEntity<ApiResponse> handleCredencialesInvalidas(CredencialesInvalidasException ex) {
 		logger.warn("Credenciales inválidas: {}", ex.getMessage());
-		
+
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 				.body(ApiResponse.error("login.error.credenciales_invalidas", "CREDENCIALES_INVALIDAS"));
 	}

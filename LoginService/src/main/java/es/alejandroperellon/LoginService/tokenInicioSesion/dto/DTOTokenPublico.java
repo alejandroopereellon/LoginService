@@ -3,6 +3,8 @@ package es.alejandroperellon.LoginService.tokenInicioSesion.dto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import jakarta.validation.constraints.NotNull;
+
 /**
  * DTO que contiene el token de usuario que se devolverá al cliente tras un
  * inicio de sesión correcto. Este token se utilizará para identificar al
@@ -14,6 +16,7 @@ import java.util.UUID;
 
 public class DTOTokenPublico {
 
+	@NotNull(message = "El token de usuario no puede ser nulo")
 	private UUID tokenUsuario;
 
 	private LocalDateTime caducidadToken;

@@ -27,20 +27,28 @@ public class Token {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id_token")
+	@Column(name = "id")
 	private long idToken;
 
 	@Column(name = "token_usuario")
 	private UUID tokenUsuario;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "id_usuario", nullable = false)
+	@JoinColumn(name = "usuario", nullable = false)
 	private Usuario usuario;
 
-	@Column(name = "caducidad_token", nullable = false)
+	@Column(name = "caducidad", nullable = false)
 	@FutureOrPresent(message = "La caducidad del token no puede ser anterior al presente")
 	@NotNull(message = "La caducidad del token no puede ser nula")
 	private LocalDateTime caducidadToken;
+
+	@Column(name = "tipo", nullable = false)
+	@NotNull(message = "El token debe ser de tipo largo o corto")
+	@Enumerated(EnumType.STRING)
+	private TipoToken tipoToken;
+
+	@Column(name = "revocado", nullable = true)
+	private LocalDateTime revocado;
 
 	// Constructor
 	public Token() {
@@ -93,6 +101,22 @@ public class Token {
 
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
+	}
+
+	public TipoToken getTipoToken() {
+		return tipoToken;
+	}
+
+	public void setTipoToken(TipoToken tipoToken) {
+		this.tipoToken = tipoToken;
+	}
+
+	public LocalDateTime getRevocado() {
+		return revocado;
+	}
+
+	public void setRevocado(LocalDateTime revocado) {
+		this.revocado = revocado;
 	}
 
 }
