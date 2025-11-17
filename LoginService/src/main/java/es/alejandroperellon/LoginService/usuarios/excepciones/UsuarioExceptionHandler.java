@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import es.alejandroperellon.LoginService.clasesAxiliares.ApiResponse;
+import es.alejandroperellon.LoginService.usuarios.excepciones.banException.DireccionIPBaneadaException;
+import es.alejandroperellon.LoginService.usuarios.excepciones.banException.UsuarioBaneadoException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CredencialesInvalidasException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CuentaEliminadaException;
 import es.alejandroperellon.LoginService.usuarios.excepciones.loginException.CuentaSuspendidaException;
@@ -77,5 +79,19 @@ public class UsuarioExceptionHandler {
 		logger.error("Error no controlado: ", ex);
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 				.body(ApiResponse.error("error.desconocido", "ERROR_INTERNO"));
+	}
+
+	@ExceptionHandler(DireccionIPBaneadaException.class)
+	public ResponseEntity<ApiResponse> handleIpBaneada(Exception ex) {
+		logger.error("Direccion IP baneada: ", ex);
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				.body(ApiResponse.error("BANEO_AVISO_DIRECCION_IP", "ERROR_IP_BANEADA"));
+	}
+
+	@ExceptionHandler(UsuarioBaneadoException.class)
+	public ResponseEntity<ApiResponse> handleUsuarioBaneado(Exception ex) {
+		logger.error("Usuario baneado: ", ex);
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				.body(ApiResponse.error("BANEO_AVISO_USUARIO", "ERROR_USUARIO_BANEADO"));
 	}
 }

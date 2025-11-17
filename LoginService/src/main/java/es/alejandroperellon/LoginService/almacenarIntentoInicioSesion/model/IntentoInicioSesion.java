@@ -48,10 +48,13 @@ public class IntentoInicioSesion {
 	@Enumerated(EnumType.STRING)
 	private ResultadoIntentoInicioSesion resultado;
 
+	@Column(name = "direccion_ip", nullable = true)
+	private String direccionIP;
+
 	// Constructores
 	public IntentoInicioSesion() {
 	}
-	
+
 	@PrePersist
 	protected void onCreate() {
 		if (momentoIntento == null) {

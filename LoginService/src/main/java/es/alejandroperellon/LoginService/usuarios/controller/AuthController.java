@@ -13,6 +13,7 @@ import es.alejandroperellon.LoginService.usuarios.dto.DTOUsuarioPublico;
 import es.alejandroperellon.LoginService.usuarios.dto.DTOUsuarioRegistro;
 import es.alejandroperellon.LoginService.usuarios.service.LoginService;
 import es.alejandroperellon.LoginService.usuarios.service.RegisterService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -35,8 +36,16 @@ public class AuthController {
 	 * POST /auth/login
 	 */
 	@PostMapping("/login")
-	public ResponseEntity<DTOUsuarioPublico> login(@Valid @RequestBody DTOUsuarioLogin datosLogin) {
-		DTOUsuarioPublico usuarioPublico = loginService.login(datosLogin);
+	public ResponseEntity<DTOUsuarioPublico> login(@Valid @RequestBody DTOUsuarioLogin datosLogin,
+			HttpServletRequest request) {
+
+		// Almacenamos la IP del usuario
+		String ip = request.getHeader("X-Forwarded-For");
+		if (ip == null || ip.isEmpty()) {
+			ip = request.getRemoteAddr();
+		}
+
+		DTOUsuarioPublico usuarioPublico = loginService.login(datosLogin, ip);
 
 		return ResponseEntity.ok(usuarioPublico);
 	}

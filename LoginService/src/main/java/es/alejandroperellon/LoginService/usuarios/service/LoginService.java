@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.Auxiliar.ResultadoIntentoInicioSesion;
 import es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.model.IntentoInicioSesion;
 import es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.repository.IntentoInicioSesionRepository;
+import es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.utils.ComprobarBaneo;
+import es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.utils.GestionBaneo;
 import es.alejandroperellon.LoginService.tokenInicioSesion.builder.TokenBuilder;
 import es.alejandroperellon.LoginService.tokenInicioSesion.model.TipoToken;
 import es.alejandroperellon.LoginService.tokenInicioSesion.model.Token;
@@ -39,13 +41,18 @@ public class LoginService {
 	private final TokenRepository tokenRepository;
 	private final IntentoInicioSesionRepository intentoRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final GestionBaneo gestionBaneo;
+	private final ComprobarBaneo comprobarBaneo;
 
 	public LoginService(UsuariosRepository usuariosRepository, TokenRepository tokenRepository,
-			IntentoInicioSesionRepository intento, PasswordEncoder passwordEncoder) {
+			IntentoInicioSesionRepository intentoRepository, PasswordEncoder passwordEncoder, GestionBaneo gestionBaneo,
+			ComprobarBaneo comprobarBaneo) {
 		this.usuariosRepository = usuariosRepository;
 		this.tokenRepository = tokenRepository;
-		this.intentoRepository = intento;
+		this.intentoRepository = intentoRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.gestionBaneo = gestionBaneo;
+		this.comprobarBaneo = comprobarBaneo;
 	}
 
 	/**
@@ -69,7 +76,7 @@ public class LoginService {
 	 *                          tiene restricciones.
 	 */
 
-	public DTOUsuarioPublico login(DTOUsuarioLogin datosInicioSesion) {
+	public DTOUsuarioPublico login(DTOUsuarioLogin datosInicioSesion, String direccionIp) {
 		logger.debug("Se ha iniciado el metodo de login con el usuario {}", datosInicioSesion.getCorreoElectronico());
 
 		// Registramos los datos introducidos por el usuario
@@ -81,15 +88,20 @@ public class LoginService {
 		IntentoInicioSesion intento = new IntentoInicioSesion();
 		intento.setCorreoIntroducido(usuarioIntento);
 
+		Usuario usuario = null;
+
 		try {
+			// Primero de todo se va a comprobar que la direccion IP no este bloqueada
+			comprobarBaneo.baneoActivoIp(direccionIp, intento);
+			
 			// Obtenemos el usuario de la peticion del cliente
-			Usuario usuario = obtenerUsuarioLogin(usuarioIntento, intento);
+			usuario = obtenerUsuarioLogin(usuarioIntento, intento);
 
 			// Comprobamos la contaseña del usuario
 			comprobarContrasenaUsuario(contrasenaIntento, usuario, intento);
 
 			// Comprobamos las restricciones del usuario
-			comprobarRestriccionCuenta(usuario, intento);
+			comprobarRestriccionCuenta(usuario, intento, direccionIp);
 
 			// Si ha pasado todos los controles ponemos intento correcto
 			intento.setResultado(ResultadoIntentoInicioSesion.CORRECTO);
@@ -117,6 +129,8 @@ public class LoginService {
 		} finally {
 			intentoRepository.save(intento);
 			logger.debug("Se ha almacenado el intento de inicio de sesion: {} en la BBDD", intento);
+
+			gestionBaneo.comprobarCandidaturaBaneo(usuario, direccionIp);
 		}
 	}
 
@@ -127,7 +141,7 @@ public class LoginService {
 	 * 
 	 * @param usuario, es el {@link Usuario} que se va a comprobar las restricciones
 	 */
-	private void comprobarRestriccionCuenta(Usuario usuario, IntentoInicioSesion intento) {
+	private void comprobarRestriccionCuenta(Usuario usuario, IntentoInicioSesion intento, String direccionIp) {
 		logger.debug("Se va a comprobar las restricciones de la cuenta");
 
 		// Comprobamos si el usuario tiene algun tipo de suspension en la cuenta
@@ -201,9 +215,13 @@ public class LoginService {
 			logger.debug("Se ha marcado el intento de inicio de sesion como USUARIO_INEXISTENTE");
 			throw new CredencialesInvalidasException("CUENTA_USUARIO_NOMBREUSUARIO_CORREO_INCORRECTOS");
 		} else {
-			// Si el usuario existe en el sistema se va a añadir al sistema
 			logger.info("El usuario {} existe en la base de datos", usuario.get());
+			// Si el usuario existe en el sistema se va a añadir al intento de inicio de
+			// sesion
 			intento.setUsuario(usuario.get());
+			logger.debug("Se ha añadido el usuario {} al sistema", usuario.get().getId());
+			// Se va comprobar si el usuario esta baneado
+			comprobarBaneo.baneoActivoUsuario(usuario.get(), intento);
 		}
 
 		return usuario.get();
