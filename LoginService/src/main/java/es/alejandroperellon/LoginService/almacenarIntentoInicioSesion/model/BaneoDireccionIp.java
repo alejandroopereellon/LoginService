@@ -39,7 +39,7 @@ public class BaneoDireccionIp {
 	private LocalDateTime momentoBaneo;
 
 	@Column(name = "momento_fin_baneo", nullable = false)
-	private LocalDateTime monentoFinBaneo;
+	private LocalDateTime momentoFinBaneo;
 
 	// Constructor
 	public BaneoDireccionIp() {
@@ -80,11 +80,11 @@ public class BaneoDireccionIp {
 	}
 
 	public LocalDateTime getMonentoFinBaneo() {
-		return monentoFinBaneo;
+		return momentoFinBaneo;
 	}
 
 	public void setMonentoFinBaneo(LocalDateTime monentoFinBaneo) {
-		this.monentoFinBaneo = monentoFinBaneo;
+		this.momentoFinBaneo = monentoFinBaneo;
 	}
 
 }

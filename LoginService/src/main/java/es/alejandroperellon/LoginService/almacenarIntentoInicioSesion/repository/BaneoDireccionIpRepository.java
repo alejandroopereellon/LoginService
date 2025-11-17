@@ -22,6 +22,6 @@ public interface BaneoDireccionIpRepository extends JpaRepository<BaneoDireccion
 	 * @param ahora es el momento en que se va a comprobar si esta baneado
 	 * @return {@link Baneo} que cumpla los requisitos
 	 */
-	Optional<BaneoDireccionIp> findByIpAndFechaFinAfter(String ip, LocalDateTime ahora);
+	Optional<BaneoDireccionIp> findByIpAndMomentoFinBaneoAfter(String ip, LocalDateTime ahora);
 
 }

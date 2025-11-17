@@ -61,7 +61,7 @@ public class ComprobarBaneo {
 	 */
 	public void baneoActivoIp(String direccionIp, IntentoInicioSesion intento) {
 		logger.debug("Se van a comprbar los baneos por direccion IP {}", direccionIp);
-		Optional<BaneoDireccionIp> baneo = baneoDireccionIpRepository.findByIpAndFechaFinAfter(direccionIp,
+		Optional<BaneoDireccionIp> baneo = baneoDireccionIpRepository.findByIpAndMomentoFinBaneoAfter(direccionIp,
 				LocalDateTime.now());
 		if (baneo.isEmpty()) {
 			logger.info("La direccion IP {} esta baneada desde {} hasta {}", direccionIp, baneo.get().getMomentoBaneo(),
@@ -82,7 +82,7 @@ public class ComprobarBaneo {
 	 */
 	public void baneoActivoUsuario(Usuario usuario, IntentoInicioSesion intento) {
 		logger.debug("Se van a comprbar los baneos para el usuario {}", usuario.getId());
-		Optional<BaneoUsuario> baneo = baneoUsuarioRepository.findByUsuarioAndFechaFinAfter(usuario,
+		Optional<BaneoUsuario> baneo = baneoUsuarioRepository.findByUsuarioAndMomentoFinBaneoAfter(usuario,
 				LocalDateTime.now());
 		if (baneo.isEmpty()) {
 			logger.info("El usuario {} esta baneada desde {} hasta {}", usuario.getId(), baneo.get().getMomentoBaneo(),

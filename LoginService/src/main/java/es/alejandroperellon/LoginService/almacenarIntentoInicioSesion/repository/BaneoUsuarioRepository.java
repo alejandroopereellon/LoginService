@@ -18,5 +18,5 @@ public interface BaneoUsuarioRepository extends JpaRepository<BaneoUsuario, Long
 	 * @param ahora   es el momento en que se va a comprobar si esta baneado
 	 * @return {@link Baneo} que cumpla los requisitos
 	 */
-	Optional<BaneoUsuario> findByUsuarioAndFechaFinAfter(Usuario usuario, LocalDateTime ahora);
+	Optional<BaneoUsuario> findByUsuarioAndMomentoFinBaneoAfter(Usuario usuario, LocalDateTime ahora);
 }

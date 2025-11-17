@@ -1,8 +1,6 @@
 package es.alejandroperellon.LoginService.almacenarIntentoInicioSesion.builder;
 
-import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +19,6 @@ import es.alejandroperellon.LoginService.usuarios.model.Usuario;
 public class BaneoBuilder {
 	private static final Logger logger = LoggerFactory.getLogger(BaneoBuilder.class);
 
-	private final Clock clock;
-
-	// Inyectamos el reloj para testear fácilmente (por defecto, sistema)
-	public BaneoBuilder(Clock clock) {
-		this.clock = clock;
-	}
-
 	/**
 	 * Contruye un nuevo objeto {@link BaneoUsuario}
 	 * 
@@ -42,7 +33,7 @@ public class BaneoBuilder {
 		BaneoUsuario baneo = new BaneoUsuario();
 
 		// Establecemos el tiempo de baneo
-		LocalDateTime ahora = LocalDateTime.now(clock.withZone(ZoneOffset.UTC));
+		LocalDateTime ahora = LocalDateTime.now();
 		LocalDateTime fin = ahora.plusMinutes(tiempoBaneo);
 
 		baneo.setMomentoBaneo(ahora);
@@ -68,7 +59,7 @@ public class BaneoBuilder {
 		BaneoDireccionIp baneo = new BaneoDireccionIp();
 
 		// Establecemos el tiempo de baneo
-		LocalDateTime ahora = LocalDateTime.now(clock.withZone(ZoneOffset.UTC));
+		LocalDateTime ahora = LocalDateTime.now();
 		LocalDateTime fin = ahora.plusMinutes(tiempoBaneo);
 
 		baneo.setMomentoBaneo(ahora);
